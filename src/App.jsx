@@ -1,7 +1,8 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Header from './components/Header'
 import Sidebar from './components/Sidebar'
 import Footer from './components/Footer'
+import Expenses from './components/Expenses'
 
 const StatCard = ({title, value, subtitle}) => (
   <div className="card">
@@ -16,29 +17,40 @@ const StatCard = ({title, value, subtitle}) => (
 )
 
 export default function App(){
+  const [currentPage, setCurrentPage] = useState('dashboard')
+
+  const renderPage = () => {
+    if (currentPage === 'expenses') {
+      return <Expenses />
+    }
+    return (
+      <main>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+          <StatCard title="Total Expenses" value="$0.00" subtitle="No expenses recorded yet" />
+          <StatCard title="This Month" value="$0.00" subtitle="Start tracking your expenses" />
+          <StatCard title="Categories" value="0" subtitle="Create your first category" />
+        </div>
+
+        <div className="card">
+          <div className="flex items-center justify-between mb-4">
+            <h3 className="text-lg font-semibold text-slate-900">Recent Activity</h3>
+          </div>
+          <div className="min-h-[200px] flex items-center justify-center text-slate-400">
+            No activity yet. Add your first expense to get started!
+          </div>
+        </div>
+      </main>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
       <Header />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 md:grid-cols-[260px_1fr] gap-6">
-          <Sidebar />
+          <Sidebar currentPage={currentPage} setCurrentPage={setCurrentPage} />
 
-          <main>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-              <StatCard title="Total Expenses" value="$0.00" subtitle="No expenses recorded yet" />
-              <StatCard title="This Month" value="$0.00" subtitle="Start tracking your expenses" />
-              <StatCard title="Categories" value="0" subtitle="Create your first category" />
-            </div>
-
-            <div className="card">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-slate-900">Recent Activity</h3>
-              </div>
-              <div className="min-h-[200px] flex items-center justify-center text-slate-400">
-                No activity yet. Add your first expense to get started!
-              </div>
-            </div>
-          </main>
+          {renderPage()}
         </div>
       </div>
       <Footer />

@@ -3,8 +3,7 @@ import { Edit, Trash } from './icons'
 
 const categories = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Other']
 
-export default function Expenses() {
-  const [expenses, setExpenses] = useState([])
+export default function Expenses({ expenses, setExpenses }) {
   const [editingId, setEditingId] = useState(null)
   const [form, setForm] = useState({
     amount: '',

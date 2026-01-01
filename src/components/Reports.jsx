@@ -14,21 +14,26 @@ import {
   Legend,
   ResponsiveContainer
 } from 'recharts'
+import { formatCurrency as formatCurrencyUtil, formatDate as formatDateUtil } from '../lib/utils'
 
-const SummaryCard = ({ title, value, subtitle }) => (
-  <div className="card">
-    <div className="text-sm text-slate-500 mb-2">{title}</div>
-    <div className="text-2xl font-semibold text-slate-900">{value}</div>
-    <div className="text-xs text-slate-500 mt-1">{subtitle}</div>
+const SummaryCard = ({ title, value, subtitle, categoryColor }) => (
+  <div className="card hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border-t-4 border-t-transparent hover:border-t-blue-500 dark:hover:border-t-sky-400">
+    <div className="text-sm text-slate-500 dark:text-slate-400 mb-2">{title}</div>
+    <div className="text-2xl font-semibold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+      {categoryColor && <span className="inline-block w-2 h-2 rounded-full" style={{background: categoryColor}} />}
+      {value}
+    </div>
+    <div className="text-xs text-slate-500 dark:text-slate-400 mt-1">{subtitle}</div>
   </div>
 )
 
-export default function Reports({ expenses }) {
+export default function Reports({ expenses, settings }) {
   const formatCurrency = (amount) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount)
+    return formatCurrencyUtil(amount, settings?.currency || 'USD')
+  }
+
+  const formatDate = (dateStr) => {
+    return formatDateUtil(dateStr, settings?.dateFormat || 'MM/DD/YYYY')
   }
 
   // Category to color mapping
@@ -101,8 +106,8 @@ export default function Reports({ expenses }) {
   const highestCategory = categoryChartData.length > 0 ? categoryChartData[0].category : 'N/A'
 
   return (
-    <main>
-      <h1 className="text-3xl font-semibold text-slate-900 mb-6">Reports</h1>
+    <main className="fade-in">
+      <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mb-6">Reports</h1>
 
       {/* Summary Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -115,6 +120,7 @@ export default function Reports({ expenses }) {
           title="Highest Category"
           value={highestCategory}
           subtitle={highestCategory !== 'N/A' ? formatCurrency(categoryChartData[0].total) : 'No data'}
+          categoryColor={highestCategory !== 'N/A' ? getColorForCategory(highestCategory) : null}
         />
         <SummaryCard
           title="This Month vs Last"
@@ -127,7 +133,7 @@ export default function Reports({ expenses }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
         {/* Bar Chart - Expenses by Category */}
         <div className="card">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Expenses by Category</h3>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Expenses by Category</h3>
           {categoryChartData.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-slate-400">
               No data available
@@ -151,7 +157,7 @@ export default function Reports({ expenses }) {
 
         {/* Pie Chart - Category Distribution */}
         <div className="card">
-          <h3 className="text-lg font-semibold text-slate-900 mb-4">Category Distribution</h3>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Category Distribution</h3>
           {pieData.length === 0 ? (
             <div className="h-64 flex items-center justify-center text-slate-400">
               No data available
@@ -182,7 +188,7 @@ export default function Reports({ expenses }) {
 
       {/* Line Chart - Spending Over Time */}
       <div className="card">
-        <h3 className="text-lg font-semibold text-slate-900 mb-4">Spending Over Time ({now.toLocaleString('en-US', { month: 'long', year: 'numeric' })})</h3>
+        <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">Spending Over Time ({now.toLocaleString('en-US', { month: 'long', year: 'numeric' })})</h3>
         {spendingChartData.length === 0 ? (
           <div className="h-64 flex items-center justify-center text-slate-400">
             No data available

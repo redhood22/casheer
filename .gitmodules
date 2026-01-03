@@ -1,0 +1,3 @@
+[submodule "smart-expense-ai"]
+	path = smart-expense-ai
+	url = https://github.com/Deetu2/smart-expense-ai.git

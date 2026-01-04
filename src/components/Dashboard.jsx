@@ -3,12 +3,12 @@ import { Sparkles, RefreshCw, Zap } from 'lucide-react'
 import { generateSpendingInsights } from '../services/openaiService'
 
 const StatCard = ({title, value, subtitle}) => (
-  <div className="card">
+  <div className="border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 rounded-lg p-6 bg-white shadow-lg dark:shadow-slate-900/50">
     <div className="flex items-center justify-between">
       <div>
-        <div className="text-sm text-slate-500">{title}</div>
-        <div className="mt-2 text-2xl font-semibold text-slate-900">{value}</div>
-        <div className="mt-1 text-sm text-slate-500">{subtitle}</div>
+        <div className="text-sm text-slate-500 dark:text-slate-400">{title}</div>
+        <div className="mt-2 text-2xl font-semibold text-slate-900 dark:text-slate-100">{value}</div>
+        <div className="mt-1 text-sm text-slate-500 dark:text-slate-300">{subtitle}</div>
       </div>
     </div>
   </div>
@@ -123,26 +123,26 @@ export default function Dashboard({ expenses }) {
         />
       </div>
 
-      <div className="card">
+      <div className="border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 rounded-lg p-6 bg-white shadow-lg dark:shadow-slate-900/50">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-semibold text-slate-900">Recent Activity</h3>
+          <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-200">Recent Activity</h3>
         </div>
         {recentExpenses.length === 0 ? (
-          <div className="min-h-[200px] flex items-center justify-center text-slate-400">
+          <div className="min-h-[200px] flex items-center justify-center text-slate-400 dark:text-slate-500">
             No activity yet. Add your first expense to get started!
           </div>
         ) : (
           <div className="space-y-3">
             {recentExpenses.map(expense => (
-              <div key={expense.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <div key={expense.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
                 <div className="flex-1">
-                  <div className="font-medium text-slate-900">{expense.description}</div>
-                  <div className="text-sm text-slate-500 flex gap-4 mt-1">
+                  <div className="font-medium text-slate-900 dark:text-slate-100">{expense.description}</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400 flex gap-4 mt-1">
                     <span>{expense.category}</span>
                     <span>{formatDate(expense.date)}</span>
                   </div>
                 </div>
-                <div className="text-lg font-semibold text-slate-900">
+                <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">
                   {formatCurrency(expense.amount)}
                 </div>
               </div>
@@ -151,55 +151,55 @@ export default function Dashboard({ expenses }) {
         )}
       </div>
 
-      <div className="bg-gradient-to-br from-emerald-50 to-blue-50 border border-emerald-200 rounded-lg p-6 shadow-sm mt-6">
+      <div className="bg-gradient-to-br from-emerald-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 border border-emerald-200 dark:border-slate-600 rounded-lg p-6 shadow-lg dark:shadow-slate-900/50 mt-6">
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-3">
-            <Sparkles size={20} className="text-emerald-600" />
-            <h3 className="text-lg font-semibold text-slate-900">AI Insights</h3>
-            <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">AI</span>
+            <Sparkles size={20} className="text-emerald-600 dark:text-emerald-400" />
+            <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100">AI Insights</h3>
+            <span className="text-xs bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2 py-0.5 rounded-full font-medium">AI</span>
           </div>
           <button
             onClick={handleRefreshInsights}
             disabled={insightsLoading || cooldownTime > 0}
-            className="p-2 rounded-lg hover:bg-white/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             title={cooldownTime > 0 ? `Wait ${cooldownTime}s` : 'Refresh insights'}
           >
             <RefreshCw 
               size={18} 
-              className={`text-emerald-600 ${insightsLoading ? 'animate-spin' : ''}`}
+              className={`text-emerald-600 dark:text-emerald-400 ${insightsLoading ? 'animate-spin' : ''}`}
             />
           </button>
         </div>
 
         {expenses.length === 0 ? (
-          <div className="min-h-[120px] flex items-center justify-center text-slate-400">
+          <div className="min-h-[120px] flex items-center justify-center text-slate-400 dark:text-slate-500">
             Add expenses to get AI-powered insights
           </div>
         ) : insightsLoading ? (
           <div className="min-h-[120px] flex items-center justify-center">
             <div className="text-center">
               <div className="inline-block animate-spin">
-                <Sparkles size={24} className="text-emerald-600" />
+                <Sparkles size={24} className="text-emerald-600 dark:text-emerald-400" />
               </div>
-              <p className="text-sm text-slate-500 mt-2">Generating insights...</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-2">Generating insights...</p>
             </div>
           </div>
         ) : insightsError ? (
-          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
-            <p className="text-sm text-red-600">{insightsError}</p>
+          <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
+            <p className="text-sm text-red-600 dark:text-red-400">{insightsError}</p>
           </div>
         ) : insights.length > 0 ? (
           <ul className="space-y-3">
             {insights.map((insight, idx) => (
-              <li key={idx} className="flex gap-3 text-sm text-slate-700">
-                <Zap size={16} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+              <li key={idx} className="flex gap-3 text-sm text-slate-700 dark:text-slate-300">
+                <Zap size={16} className="text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" />
                 <span>{insight}</span>
               </li>
             ))}
           </ul>
         ) : (
-          <div className="p-4 bg-white/50 rounded-lg">
-            <p className="text-sm text-slate-600">No insights available</p>
+          <div className="p-4 bg-white/50 dark:bg-slate-700/30 rounded-lg">
+            <p className="text-sm text-slate-600 dark:text-slate-400">No insights available</p>
           </div>
         )}
       </div>

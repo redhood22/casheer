@@ -101,17 +101,17 @@ export default function Expenses({ expenses, setExpenses }) {
 
   return (
     <div>
-      <h1 className="text-3xl font-semibold text-slate-900 mb-6">Expenses</h1>
+      <h1 className="text-3xl font-semibold text-slate-900 dark:text-slate-100 mb-6">Expenses</h1>
 
       {/* Add Expense Form */}
-      <div className="card mb-6">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">{editingId ? 'Edit Expense' : 'Add Expense'}</h2>
+      <div className="border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 rounded-lg p-6 bg-white shadow-lg dark:shadow-slate-900/50 mb-6">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">{editingId ? 'Edit Expense' : 'Add Expense'}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Amount</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Amount</label>
               <div className="relative">
-                <span className="absolute left-3 top-3 text-slate-500">$</span>
+                <span className="absolute left-3 top-3 text-slate-500 dark:text-slate-400">$</span>
                 <input
                   type="number"
                   name="amount"
@@ -120,19 +120,19 @@ export default function Expenses({ expenses, setExpenses }) {
                   placeholder="0.00"
                   step="0.01"
                   min="0"
-                  className="w-full pl-7 pr-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  className="w-full pl-7 pr-3 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
+              <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Category</label>
               <div className="flex gap-2">
                 <select
                   name="category"
                   value={form.category}
                   onChange={handleChange}
-                  className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                  className="flex-1 px-3 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
                 >
                   {categories.map(cat => (
                     <option key={cat} value={cat}>{cat}</option>
@@ -142,7 +142,7 @@ export default function Expenses({ expenses, setExpenses }) {
                   type="button"
                   onClick={handleAISuggest}
                   disabled={!form.description.trim() || aiLoading}
-                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-600 dark:hover:bg-emerald-500 disabled:bg-slate-300 dark:disabled:bg-slate-600 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
                 >
                   <Sparkles size={18} />
                   {aiLoading ? 'Suggesting...' : 'AI Suggest'}
@@ -152,25 +152,25 @@ export default function Expenses({ expenses, setExpenses }) {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Description</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Description</label>
             <input
               type="text"
               name="description"
               value={form.description}
               onChange={handleChange}
               placeholder="e.g., Groceries at Whole Foods"
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             />
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-2">Date</label>
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Date</label>
             <input
               type="date"
               name="date"
               value={form.date}
               onChange={handleChange}
-              className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+              className="w-full px-3 py-2 border border-slate-200 dark:border-slate-600 dark:bg-slate-700 dark:text-white dark:placeholder-slate-400 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
             />
           </div>
 
@@ -193,24 +193,24 @@ export default function Expenses({ expenses, setExpenses }) {
       </div>
 
       {/* Expenses List */}
-      <div className="card">
-        <h2 className="text-lg font-semibold text-slate-900 mb-4">All Expenses</h2>
+      <div className="border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 rounded-lg p-6 bg-white shadow-lg dark:shadow-slate-900/50">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">All Expenses</h2>
         {expenses.length === 0 ? (
-          <div className="min-h-[200px] flex items-center justify-center text-slate-400">
+          <div className="min-h-[200px] flex items-center justify-center text-slate-400 dark:text-slate-500">
             No expenses yet. Add one to get started!
           </div>
         ) : (
           <div className="space-y-3">
             {expenses.map(expense => (
-              <div key={expense.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg border border-slate-200">
+              <div key={expense.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600/50 transition-colors">
                 <div className="flex-1">
-                  <div className="font-medium text-slate-900">{expense.description}</div>
-                  <div className="text-sm text-slate-500 flex gap-4 mt-1">
+                  <div className="font-medium text-slate-900 dark:text-slate-100">{expense.description}</div>
+                  <div className="text-sm text-slate-500 dark:text-slate-400 flex gap-4 mt-1">
                     <span>{expense.category}</span>
                     <span>{formatDate(expense.date)}</span>
                   </div>
                 </div>
-                <div className="text-lg font-semibold text-slate-900 mr-4">
+                <div className="text-lg font-semibold text-slate-900 dark:text-slate-100 mr-4">
                   {formatCurrency(expense.amount)}
                 </div>
                 <div className="flex items-center gap-2">

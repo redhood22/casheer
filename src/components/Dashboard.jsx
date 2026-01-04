@@ -1,4 +1,6 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { Sparkles, RefreshCw, Zap } from 'lucide-react'
+import { generateSpendingInsights } from '../services/openaiService'
 
 const StatCard = ({title, value, subtitle}) => (
   <div className="card">
@@ -13,6 +15,12 @@ const StatCard = ({title, value, subtitle}) => (
 )
 
 export default function Dashboard({ expenses }) {
+  const [insights, setInsights] = useState([])
+  const [insightsLoading, setInsightsLoading] = useState(false)
+  const [insightsError, setInsightsError] = useState(null)
+  const [lastRefreshTime, setLastRefreshTime] = useState(0)
+  const [cooldownTime, setCooldownTime] = useState(0)
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -22,6 +30,56 @@ export default function Dashboard({ expenses }) {
 
   const formatDate = (dateStr) => {
     return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+  }
+
+  // Generate insights on component load or when expenses change
+  useEffect(() => {
+    if (expenses.length > 0) {
+      loadInsights()
+    }
+  }, [expenses.length])
+
+  // Handle cooldown timer
+  useEffect(() => {
+    if (cooldownTime > 0) {
+      const timer = setTimeout(() => setCooldownTime(cooldownTime - 1), 1000)
+      return () => clearTimeout(timer)
+    }
+  }, [cooldownTime])
+
+  const loadInsights = async () => {
+    if (expenses.length === 0) {
+      setInsights([])
+      return
+    }
+
+    setInsightsLoading(true)
+    setInsightsError(null)
+    try {
+      const result = await generateSpendingInsights(expenses)
+      if (Array.isArray(result)) {
+        setInsights(result)
+      } else {
+        setInsights([])
+        setInsightsError('Unable to generate insights')
+      }
+    } catch (error) {
+      console.error('Failed to generate insights:', error)
+      setInsightsError('Failed to generate insights. Please try again.')
+      setInsights([])
+    } finally {
+      setInsightsLoading(false)
+    }
+  }
+
+  const handleRefreshInsights = async () => {
+    const now = Date.now()
+    if (now - lastRefreshTime < 10000) {
+      setCooldownTime(10 - Math.floor((now - lastRefreshTime) / 1000))
+      return
+    }
+    setLastRefreshTime(now)
+    await loadInsights()
   }
 
   // Calculate total expenses
@@ -89,6 +147,59 @@ export default function Dashboard({ expenses }) {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+      </div>
+
+      <div className="bg-gradient-to-br from-emerald-50 to-blue-50 border border-emerald-200 rounded-lg p-6 shadow-sm mt-6">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-3">
+            <Sparkles size={20} className="text-emerald-600" />
+            <h3 className="text-lg font-semibold text-slate-900">AI Insights</h3>
+            <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-medium">AI</span>
+          </div>
+          <button
+            onClick={handleRefreshInsights}
+            disabled={insightsLoading || cooldownTime > 0}
+            className="p-2 rounded-lg hover:bg-white/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            title={cooldownTime > 0 ? `Wait ${cooldownTime}s` : 'Refresh insights'}
+          >
+            <RefreshCw 
+              size={18} 
+              className={`text-emerald-600 ${insightsLoading ? 'animate-spin' : ''}`}
+            />
+          </button>
+        </div>
+
+        {expenses.length === 0 ? (
+          <div className="min-h-[120px] flex items-center justify-center text-slate-400">
+            Add expenses to get AI-powered insights
+          </div>
+        ) : insightsLoading ? (
+          <div className="min-h-[120px] flex items-center justify-center">
+            <div className="text-center">
+              <div className="inline-block animate-spin">
+                <Sparkles size={24} className="text-emerald-600" />
+              </div>
+              <p className="text-sm text-slate-500 mt-2">Generating insights...</p>
+            </div>
+          </div>
+        ) : insightsError ? (
+          <div className="p-4 bg-red-50 border border-red-200 rounded-lg">
+            <p className="text-sm text-red-600">{insightsError}</p>
+          </div>
+        ) : insights.length > 0 ? (
+          <ul className="space-y-3">
+            {insights.map((insight, idx) => (
+              <li key={idx} className="flex gap-3 text-sm text-slate-700">
+                <Zap size={16} className="text-emerald-600 flex-shrink-0 mt-0.5" />
+                <span>{insight}</span>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <div className="p-4 bg-white/50 rounded-lg">
+            <p className="text-sm text-slate-600">No insights available</p>
           </div>
         )}
       </div>

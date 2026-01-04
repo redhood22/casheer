@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
 import { Edit, Trash } from './icons'
+import { Sparkles } from 'lucide-react'
+import { categorizeExpense } from '../services/openaiService'
 
 const categories = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Other']
 
 export default function Expenses({ expenses, setExpenses }) {
   const [editingId, setEditingId] = useState(null)
+  const [aiLoading, setAiLoading] = useState(false)
   const [form, setForm] = useState({
     amount: '',
     description: '',
@@ -71,6 +74,20 @@ export default function Expenses({ expenses, setExpenses }) {
     })
   }
 
+  const handleAISuggest = async () => {
+    if (!form.description.trim()) return
+
+    setAiLoading(true)
+    try {
+      const suggestedCategory = await categorizeExpense(form.description)
+      setForm(prev => ({ ...prev, category: suggestedCategory }))
+    } catch (error) {
+      console.error('AI suggest failed:', error)
+    } finally {
+      setAiLoading(false)
+    }
+  }
+
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
@@ -110,16 +127,27 @@ export default function Expenses({ expenses, setExpenses }) {
 
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-2">Category</label>
-              <select
-                name="category"
-                value={form.category}
-                onChange={handleChange}
-                className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
-              >
-                {categories.map(cat => (
-                  <option key={cat} value={cat}>{cat}</option>
-                ))}
-              </select>
+              <div className="flex gap-2">
+                <select
+                  name="category"
+                  value={form.category}
+                  onChange={handleChange}
+                  className="flex-1 px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
+                >
+                  {categories.map(cat => (
+                    <option key={cat} value={cat}>{cat}</option>
+                  ))}
+                </select>
+                <button
+                  type="button"
+                  onClick={handleAISuggest}
+                  disabled={!form.description.trim() || aiLoading}
+                  className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-medium rounded-lg transition-colors flex items-center gap-2 whitespace-nowrap"
+                >
+                  <Sparkles size={18} />
+                  {aiLoading ? 'Suggesting...' : 'AI Suggest'}
+                </button>
+              </div>
             </div>
           </div>
 

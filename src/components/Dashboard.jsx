@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react'
 import { Sparkles, RefreshCw, Zap } from 'lucide-react'
 import { generateSpendingInsights } from '../services/openaiService'
+import { categoryColorMap } from '../lib/categoryColors';
 
-const StatCard = ({title, value, subtitle}) => (
+const StatCard = ({ title, value, subtitle }) => (
   <div className="border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 rounded-lg p-6 bg-white shadow-lg dark:shadow-slate-900/50">
     <div className="flex items-center justify-between">
       <div>
@@ -14,7 +15,7 @@ const StatCard = ({title, value, subtitle}) => (
   </div>
 )
 
-export default function Dashboard({ expenses }) {
+export default function Dashboard({ expenses, settings }) {
   const [insights, setInsights] = useState([])
   const [insightsLoading, setInsightsLoading] = useState(false)
   const [insightsError, setInsightsError] = useState(null)
@@ -24,12 +25,20 @@ export default function Dashboard({ expenses }) {
   const formatCurrency = (amount) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD'
+      currency: settings?.currency || 'USD'
     }).format(amount)
   }
 
   const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    const date = new Date(dateStr)
+    const day = String(date.getDate()).padStart(2, '0')
+    const month = String(date.getMonth() + 1).padStart(2, '0')
+    const year = date.getFullYear()
+
+    const format = settings?.dateFormat || 'MM/DD/YYYY'
+    if (format === 'DD/MM/YYYY') return `${day}/${month}/${year}`
+    if (format === 'YYYY-MM-DD') return `${year}-${month}-${day}`
+    return `${month}/${day}/${year}` // MM/DD/YYYY
   }
 
   // Generate insights on component load or when expenses change
@@ -106,19 +115,19 @@ export default function Dashboard({ expenses }) {
   return (
     <main>
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <StatCard 
-          title="Total Expenses" 
-          value={formatCurrency(totalExpenses)} 
+        <StatCard
+          title="Total Expenses"
+          value={formatCurrency(totalExpenses)}
           subtitle={expenses.length === 0 ? 'No expenses recorded yet' : `${expenses.length} expense${expenses.length !== 1 ? 's' : ''}`}
         />
-        <StatCard 
-          title="This Month" 
-          value={formatCurrency(monthlyExpenses)} 
+        <StatCard
+          title="This Month"
+          value={formatCurrency(monthlyExpenses)}
           subtitle={monthlyExpenses === 0 ? 'Start tracking your expenses' : `In ${now.toLocaleString('en-US', { month: 'long' })}`}
         />
-        <StatCard 
-          title="Categories" 
-          value={uniqueCategories} 
+        <StatCard
+          title="Categories"
+          value={uniqueCategories}
           subtitle={uniqueCategories === 0 ? 'Create your first category' : `${uniqueCategories} categor${uniqueCategories !== 1 ? 'ies' : 'y'}`}
         />
       </div>
@@ -133,20 +142,39 @@ export default function Dashboard({ expenses }) {
           </div>
         ) : (
           <div className="space-y-3">
-            {recentExpenses.map(expense => (
-              <div key={expense.id} className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-lg border border-slate-200 dark:border-slate-600">
-                <div className="flex-1">
-                  <div className="font-medium text-slate-900 dark:text-slate-100">{expense.description}</div>
-                  <div className="text-sm text-slate-500 dark:text-slate-400 flex gap-4 mt-1">
-                    <span>{expense.category}</span>
-                    <span>{formatDate(expense.date)}</span>
+            {recentExpenses.map(expense => {
+              const categoryColors = categoryColorMap[expense.category] || categoryColorMap.Other;
+              return (
+                <div
+                  key={expense.id}
+                  className="p-3 bg-white dark:bg-slate-700/50 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-750 cursor-pointer transition-all duration-200"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className={`w-2 h-2 rounded-full ${categoryColors.dot}`}></div>
+                          <p className="font-medium text-slate-900 dark:text-slate-100">{expense.description}</p>
+                        </div>
+                        <div className="flex items-center gap-2 mt-1 ml-4">
+                          <span className={`text-xs px-2 py-0.5 rounded-md font-medium ${categoryColors.bg} ${categoryColors.text}`}>
+                            {expense.category}
+                          </span>
+                          <span className="text-xs text-slate-500 dark:text-slate-400">
+                            {formatDate(expense.date)}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-slate-900 dark:text-slate-100">
+                        {formatCurrency(expense.amount)}
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="text-lg font-semibold text-slate-900 dark:text-slate-100">
-                  {formatCurrency(expense.amount)}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
@@ -164,8 +192,8 @@ export default function Dashboard({ expenses }) {
             className="p-2 rounded-lg hover:bg-white/50 dark:hover:bg-slate-700/50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             title={cooldownTime > 0 ? `Wait ${cooldownTime}s` : 'Refresh insights'}
           >
-            <RefreshCw 
-              size={18} 
+            <RefreshCw
+              size={18}
               className={`text-emerald-600 dark:text-emerald-400 ${insightsLoading ? 'animate-spin' : ''}`}
             />
           </button>

@@ -40,3 +40,4 @@ Example insights include:
  Prompt Management
 AI prompts are stored separately to allow easy updates and improvements without changing application logic.  
 This approach supports better prompt engineering and maintainability.
+

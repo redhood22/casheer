@@ -1,4 +1,5 @@
-import React from 'react'
+import { categoryColorMap } from '../lib/categoryColors';
+import React, { useState } from 'react'
 import {
   BarChart,
   Bar,
@@ -15,6 +16,10 @@ import {
   ResponsiveContainer
 } from 'recharts'
 import { formatCurrency as formatCurrencyUtil, formatDate as formatDateUtil } from '../lib/utils'
+
+const getColorForCategory = (category) => {
+  return categoryColorMap[category]?.chart || '#ef4444';
+}
 
 const SummaryCard = ({ title, value, subtitle, categoryColor }) => (
   <div className="card hover:shadow-lg hover:-translate-y-1 transition-all duration-300 border-t-4 border-t-transparent hover:border-t-blue-500 dark:hover:border-t-sky-400">
@@ -37,16 +42,7 @@ export default function Reports({ expenses, settings }) {
   }
 
   // Category to color mapping
-  const categoryColors = {
-    'Shopping': '#2563eb',
-    'Food': '#10b981',
-    'Entertainment': '#7c3aed',
-    'Bills': '#06b6d4',
-    'Transport': '#f59e0b',
-    'Other': '#f43f5e'
-  }
-
-  const getColorForCategory = (category) => categoryColors[category] || '#6b7280'
+  const COLORS = Object.values(categoryColorMap).map(c => c.chart);
 
   // Get current month expenses
   const now = new Date()

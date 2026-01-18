@@ -6,9 +6,11 @@ import { categoryColorMap } from '../lib/categoryColors';
 
 const categories = ['Food', 'Transport', 'Entertainment', 'Shopping', 'Bills', 'Other']
 
-export default function Expenses({ expenses, setExpenses, settings }) {
+export default function Expenses({ expenses, settings, onAddExpense, onUpdateExpense, onDeleteExpense }) {
   const [editingId, setEditingId] = useState(null)
   const [aiLoading, setAiLoading] = useState(false)
+  const [operationLoading, setOperationLoading] = useState(false)
+  const [operationError, setOperationError] = useState(null)
   const [form, setForm] = useState({
     amount: '',
     description: '',
@@ -21,32 +23,40 @@ export default function Expenses({ expenses, setExpenses, settings }) {
     setForm(prev => ({ ...prev, [name]: value }))
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     if (!form.amount || !form.description) return
 
-    if (editingId) {
-      setExpenses(prev => prev.map(exp =>
-        exp.id === editingId
-          ? { ...exp, ...form, amount: parseFloat(form.amount) }
-          : exp
-      ))
-      setEditingId(null)
-    } else {
-      const newExpense = {
-        id: Date.now(),
-        ...form,
-        amount: parseFloat(form.amount)
-      }
-      setExpenses(prev => [newExpense, ...prev])
-    }
+    setOperationLoading(true)
+    setOperationError(null)
 
-    setForm({
-      amount: '',
-      description: '',
-      category: 'Food',
-      date: new Date().toISOString().split('T')[0]
-    })
+    try {
+      const expenseData = {
+        amount: form.amount,
+        description: form.description,
+        category: form.category,
+        date: form.date
+      }
+
+      if (editingId) {
+        await onUpdateExpense(editingId, expenseData)
+      } else {
+        await onAddExpense(expenseData)
+      }
+
+      setForm({
+        amount: '',
+        description: '',
+        category: 'Food',
+        date: new Date().toISOString().split('T')[0]
+      })
+      setEditingId(null)
+    } catch (err) {
+      console.error('Operation failed:', err)
+      setOperationError(err.message || 'Operation failed')
+    } finally {
+      setOperationLoading(false)
+    }
   }
 
   const handleEdit = (expense) => {
@@ -59,9 +69,19 @@ export default function Expenses({ expenses, setExpenses, settings }) {
     })
   }
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     if (window.confirm('Are you sure you want to delete this expense?')) {
-      setExpenses(prev => prev.filter(exp => exp.id !== id))
+      setOperationLoading(true)
+      setOperationError(null)
+
+      try {
+        await onDeleteExpense(id)
+      } catch (err) {
+        console.error('Delete failed:', err)
+        setOperationError(err.message || 'Failed to delete expense')
+      } finally {
+        setOperationLoading(false)
+      }
     }
   }
 
@@ -114,6 +134,13 @@ export default function Expenses({ expenses, setExpenses, settings }) {
       {/* Add Expense Form */}
       <div className="border border-slate-200 dark:border-slate-700 dark:bg-slate-800/50 rounded-lg p-6 bg-white shadow-lg dark:shadow-slate-900/50 mb-6">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-slate-100 mb-4">{editingId ? 'Edit Expense' : 'Add Expense'}</h2>
+        
+        {operationError && (
+          <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-200 rounded-lg text-sm">
+            {operationError}
+          </div>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
@@ -184,15 +211,17 @@ export default function Expenses({ expenses, setExpenses, settings }) {
 
           <button
             type="submit"
-            className="w-full md:w-auto px-6 py-2 bg-[#2563eb] text-white font-medium rounded-lg hover:bg-blue-700 transition-colors"
+            disabled={operationLoading}
+            className="w-full md:w-auto px-6 py-2 bg-[#2563eb] text-white font-medium rounded-lg hover:bg-blue-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition-colors"
           >
-            {editingId ? 'Update Expense' : 'Add Expense'}
+            {operationLoading ? 'Saving...' : (editingId ? 'Update Expense' : 'Add Expense')}
           </button>
           {editingId && (
             <button
               type="button"
               onClick={handleCancel}
-              className="w-full md:w-auto px-6 py-2 ml-2 bg-slate-200 text-slate-900 font-medium rounded-lg hover:bg-slate-300 transition-colors"
+              disabled={operationLoading}
+              className="w-full md:w-auto px-6 py-2 ml-2 bg-slate-200 text-slate-900 font-medium rounded-lg hover:bg-slate-300 disabled:bg-slate-100 disabled:cursor-not-allowed transition-colors"
             >
               Cancel
             </button>
